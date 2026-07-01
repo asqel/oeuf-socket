@@ -1,8 +1,8 @@
 #include "oeuf_socket.h"
 
-static int init_fd(oeso_server_ctx_t *ctx, int port);
+static int init_fd(oeso_srv_ctx_t *ctx, int port);
 
-int oeso_server_init(oeso_server_ctx_t *ctx, int port) {
+int oeso_server_init(oeso_srv_ctx_t *ctx, int port) {
 	if (!ctx)
 		return -1;
 	if (init_fd(ctx, port))
@@ -14,7 +14,7 @@ int oeso_server_init(oeso_server_ctx_t *ctx, int port) {
 }
 
 #if defined(_WIN32) || defined(__linux__)
-static int init_fd(oeso_server_ctx_t *ctx, int port) {
+static int init_fd(oeso_srv_ctx_t *ctx, int port) {
 	#if defined(_WIN32)
 		WSADATA wsa;
 		if (WSAStartup(MAKEWORD(2,2), &wsa) != 0)

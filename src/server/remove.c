@@ -1,7 +1,7 @@
 #include "oeuf_socket.h"
 
 #if defined(_WIN32) || defined(__linux__)
-void oeso_server_remove(oeso_server_ctx_t *ctx, oeso_server_client_t *clt) {
+void oeso_server_remove(oeso_srv_ctx_t *ctx, oeso_srv_clt_t *clt) {
 	if (clt->fd == INVALID_SOCKET)
 		return ;
 	ctx->on_disconnect(clt, ctx, 1);

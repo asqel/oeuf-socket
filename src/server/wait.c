@@ -1,7 +1,7 @@
 #include "oeuf_socket.h"
 
 #if defined(_WIN32) || defined(__linux__)
-static int wait_events(int64_t timeout, oeso_server_ctx_t *ctx) {
+static int wait_events(int64_t timeout, oeso_srv_ctx_t *ctx) {
 	#if defined(_WIN32)
 		WSAPOLLFD *fds = malloc(sizeof(WSAPOLLFD) * (1 + ctx->clients_len));
 	#else
@@ -52,7 +52,7 @@ static int wait_events(int64_t timeout, oeso_server_ctx_t *ctx) {
 	return has_disco;
 }
 
-void oeso_server_wait(oeso_server_ctx_t *ctx, int at_least_ms) {
+void oeso_server_wait(oeso_srv_ctx_t *ctx, int at_least_ms) {
 	int64_t end = _oeso_time_ms() + at_least_ms;
 	while (at_least_ms < 0 || _oeso_time_ms() < end) {
 		if (at_least_ms < 0)

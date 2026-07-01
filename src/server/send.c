@@ -1,7 +1,7 @@
 #include "oeuf_socket.h"
 
 #if defined(_WIN32) || defined(__linux__)
-ssize_t oeso_server_send(oeso_server_ctx_t *ctx, oeso_server_client_t *clt, void *buf, size_t len) {
+ssize_t oeso_server_send(oeso_srv_ctx_t *ctx, oeso_srv_clt_t *clt, void *buf, size_t len) {
 	if (clt->fd == INVALID_SOCKET)
 		return -1;
 	ssize_t ret = send(clt->fd, buf, len, 0);

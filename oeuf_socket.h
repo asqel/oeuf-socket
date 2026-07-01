@@ -31,10 +31,10 @@
 
 #endif
 
-typedef struct oeso_server_client_t oeso_server_client_t;
-typedef struct oeso_server_ctx_t oeso_server_ctx_t;
+typedef struct oeso_srv_clt_t oeso_srv_clt_t;
+typedef struct oeso_srv_ctx_t oeso_srv_ctx_t;
 
-struct oeso_server_client_t {
+struct oeso_srv_clt_t {
 	oeso_socket_t fd;
 
 	struct sockaddr addr;
@@ -43,39 +43,45 @@ struct oeso_server_client_t {
 	void *data;
 };
 
-struct oeso_server_ctx_t {
+struct oeso_srv_ctx_t {
 	oeso_socket_t fd;
 
 	size_t max_clt_data;
-	int (*on_connect)(oeso_server_client_t *, oeso_server_ctx_t *); // return 1 to refuse
-	void (*on_disconnect)(oeso_server_client_t *, oeso_server_ctx_t *, int); // int == 0 if reset
-	void (*on_recv)(oeso_server_client_t *, oeso_server_ctx_t *, void *, size_t);
-	void (*on_send_ready)(oeso_server_client_t *, oeso_server_ctx_t *); // used by wait
+	int (*on_connect)(oeso_srv_clt_t *, oeso_srv_ctx_t *); // return 1 to refuse
+	void (*on_disconnect)(oeso_srv_clt_t *, oeso_srv_ctx_t *, int); // int == 0 if reset
+	void (*on_recv)(oeso_srv_clt_t *, oeso_srv_ctx_t *, void *, size_t);
+	void (*on_send_ready)(oeso_srv_clt_t *, oeso_srv_ctx_t *); // used by wait
 	uint8_t need_send; // set to 1 to receiv on_send_ready when wait
 
-	oeso_server_client_t *clients;
+	oeso_srv_clt_t *clients;
 	size_t clients_len;
 	size_t clients_capacity;
 
 	void *data;
 };
 
-int oeso_server_init(oeso_server_ctx_t *ctx, int port);
-void oeso_server_update(oeso_server_ctx_t *ctx);
-void oeso_server_remove(oeso_server_ctx_t *ctx, oeso_server_client_t *clt);
+// server side
+int oeso_server_init(oeso_srv_ctx_t *ctx, int port);
+void oeso_server_update(oeso_srv_ctx_t *ctx);
+void oeso_server_remove(oeso_srv_ctx_t *ctx, oeso_srv_clt_t *clt);
 // return < 0 if connection ended ( == 0 if full for now)
-ssize_t oeso_server_send(oeso_server_ctx_t *ctx, oeso_server_client_t *clt, void *buf, size_t len);
+ssize_t oeso_server_send(oeso_srv_ctx_t *ctx, oeso_srv_clt_t *clt, void *buf, size_t len);
 // can call ctx->on_send_ready
-void oeso_server_wait(oeso_server_ctx_t *ctx, int at_least_ms);
+void oeso_server_wait(oeso_srv_ctx_t *ctx, int at_least_ms);
 void oeso_server_exit(oeso_servre_ctx_t *ctx);
+
+
+// client side
+int oeso_client_init(oeso_clt_ctx_t *ctx, int port, const char *ip);
+
 
 
 // internal stuff
 int _oeso_set_nonblock(oeso_socket_t fd);
 int64_t _oeso_time_ms();
-void _oeso_check_accept(oeso_server_ctx_t *ctx);
-void _oeso_check_clients(oeso_server_ctx_t *ctx);
-void _oeso_update_client(oeso_server_client_t *clt, oeso_server_ctx_t *ctx);
-void _oeso_clean_list(oeso_server_ctx_t *ctx);
+void _oeso_check_accept(oeso_srv_ctx_t *ctx);
+void _oeso_check_clients(oeso_srv_ctx_t *ctx);
+void _oeso_update_client(oeso_srv_clt_t *clt, oeso_srv_ctx_t *ctx);
+void _oeso_clean_list(oeso_srv_ctx_t *ctx);
 
 #endif

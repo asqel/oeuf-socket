@@ -1,14 +1,14 @@
 #include "oeuf_socket.h"
 
-void oeso_server_update(oeso_server_ctx_t *ctx) {
+void oeso_server_update(oeso_srv_ctx_t *ctx) {
 	_oeso_check_accept(ctx);	
 	_oeso_check_clients(ctx);
 }
 
-static int add_space(oeso_server_ctx_t *ctx) {
+static int add_space(oeso_srv_ctx_t *ctx) {
 	if (ctx->clients_len < ctx->clients_capacity)
 		return 0;
-	oeso_server_client_t *new_ptr = realloc(ctx->clients, sizeof(oeso_server_client_t) * (ctx->clients_capacity + 16));
+	oeso_srv_clt_t *new_ptr = realloc(ctx->clients, sizeof(oeso_srv_clt_t) * (ctx->clients_capacity + 16));
 	if (!new_ptr)
 		return 1;
 	ctx->clients = new_ptr;
@@ -17,7 +17,7 @@ static int add_space(oeso_server_ctx_t *ctx) {
 }
 
 #if defined(_WIN32) || defined(__linux__)
-void _oeso_check_accept(oeso_server_ctx_t *ctx) {
+void _oeso_check_accept(oeso_srv_ctx_t *ctx) {
 	struct sockaddr addr = {0};
 	socklen_t addr_len = 0;
 
@@ -50,7 +50,7 @@ void _oeso_check_accept(oeso_server_ctx_t *ctx) {
 #endif
 
 #if defined(_WIN32) || defined(__linux__)
-void _oeso_update_client(oeso_server_client_t *clt, oeso_server_ctx_t *ctx) {
+void _oeso_update_client(oeso_srv_clt_t *clt, oeso_srv_ctx_t *ctx) {
 	int is_fine = 0;
 	while (1) {
 		uint8_t buffer[4096 * 2];
@@ -87,22 +87,22 @@ void _oeso_update_client(oeso_server_client_t *clt, oeso_server_ctx_t *ctx) {
 
 #endif
 
-void _oeso_check_clients(oeso_server_ctx_t *ctx) {
+void _oeso_check_clients(oeso_srv_ctx_t *ctx) {
 	for (size_t i = 0; i < ctx->clients_len; i++) {
-		oeso_server_client_t *clt = &ctx->clients[i];
+		oeso_srv_clt_t *clt = &ctx->clients[i];
 		if (clt->fd != INVALID_SOCKET)
 			_oeso_update_client(clt, ctx);
 	}
 	_oeso_clean_list(ctx);
 }
 
-void _oeso_clean_list(oeso_server_ctx_t *ctx) {
+void _oeso_clean_list(oeso_srv_ctx_t *ctx) {
 	size_t count = 0;
 	for (size_t i = 0; i < ctx->clients_len; i++) {
 		
 
 		if (ctx->clients[i].fd != INVALID_SOCKET) {
-			oeso_server_client_t tmp = ctx->clients[i];
+			oeso_srv_clt_t tmp = ctx->clients[i];
 			ctx->clients[i] = ctx->clients[count];
 			ctx->clients[count] = tmp;
 			count++;
