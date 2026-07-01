@@ -12,6 +12,7 @@
 	#define SOCK_CLOSE closesocket
 
 #elif defined(__linux__)
+	#include <poll.h>
 	#include <sys/socket.h>
 	#include <time.h>
 	#include <arpa/inet.h>
@@ -50,6 +51,7 @@ struct oeso_server_ctx_t {
 	void (*on_disconnect)(oeso_server_client_t *, oeso_server_ctx_t *, int); // int == 0 if reset
 	void (*on_recv)(oeso_server_client_t *, oeso_server_ctx_t *, void *, size_t);
 	void (*on_send_ready)(oeso_server_client_t *, oeso_server_ctx_t *); // used by wait
+	uint8_t need_send; // set to 1 to receiv on_send_ready when wait
 
 	oeso_server_client_t *clients;
 	size_t clients_len;
@@ -61,15 +63,19 @@ struct oeso_server_ctx_t {
 int oeso_server_init(oeso_server_ctx_t *ctx, int port);
 void oeso_server_update(oeso_server_ctx_t *ctx);
 void oeso_server_remove(oeso_server_ctx_t *ctx, oeso_server_client_t *clt);
-
 // return < 0 if connection ended ( == 0 if full for now)
 ssize_t oeso_server_send(oeso_server_ctx_t *ctx, oeso_server_client_t *clt, void *buf, size_t len);
-
 // can call ctx->on_send_ready
-void oeso_server_wait(int at_least_ms, oeso_server_ctx_t *ctx);
+void oeso_server_wait(oeso_server_ctx_t *ctx, int at_least_ms);
+void oeso_server_exit(oeso_servre_ctx_t *ctx);
+
 
 // internal stuff
-int oeso_I_set_nonblock(oeso_socket_t fd);
-int64_t oeso_I_time_ms();
+int _oeso_set_nonblock(oeso_socket_t fd);
+int64_t _oeso_time_ms();
+void _oeso_check_accept(oeso_server_ctx_t *ctx);
+void _oeso_check_clients(oeso_server_ctx_t *ctx);
+void _oeso_update_client(oeso_server_client_t *clt, oeso_server_ctx_t *ctx);
+void _oeso_clean_list(oeso_server_ctx_t *ctx);
 
 #endif

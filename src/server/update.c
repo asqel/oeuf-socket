@@ -1,11 +1,8 @@
 #include "oeuf_socket.h"
 
-static void check_accept(oeso_server_ctx_t *ctx);
-static void check_clients(oeso_server_ctx_t *ctx);
-
 void oeso_server_update(oeso_server_ctx_t *ctx) {
-	check_accept(ctx);	
-	check_clients(ctx);
+	_oeso_check_accept(ctx);	
+	_oeso_check_clients(ctx);
 }
 
 static int add_space(oeso_server_ctx_t *ctx) {
@@ -20,7 +17,7 @@ static int add_space(oeso_server_ctx_t *ctx) {
 }
 
 #if defined(_WIN32) || defined(__linux__)
-static void check_accept(oeso_server_ctx_t *ctx) {
+void _oeso_check_accept(oeso_server_ctx_t *ctx) {
 	struct sockaddr addr = {0};
 	socklen_t addr_len = 0;
 
@@ -28,7 +25,7 @@ static void check_accept(oeso_server_ctx_t *ctx) {
 	if (fd == INVALID_SOCKET)
 		return ;
 
-	if (oeso_I_set_nonblock(fd))
+	if (_oeso_set_nonblock(fd))
 		goto err;
 	if (add_space(ctx))
 		goto err;
@@ -53,7 +50,7 @@ static void check_accept(oeso_server_ctx_t *ctx) {
 #endif
 
 #if defined(_WIN32) || defined(__linux__)
-static void update_client(oeso_server_client_t *clt, oeso_server_ctx_t *ctx) {
+void _oeso_update_client(oeso_server_client_t *clt, oeso_server_ctx_t *ctx) {
 	int is_fine = 0;
 	while (1) {
 		uint8_t buffer[4096 * 2];
@@ -90,20 +87,21 @@ static void update_client(oeso_server_client_t *clt, oeso_server_ctx_t *ctx) {
 
 #endif
 
-#define IS_TO_REMOVE(CLT) (CLT.fd == INVALID_SOCKET)
-
-static void check_clients(oeso_server_ctx_t *ctx) {
+void _oeso_check_clients(oeso_server_ctx_t *ctx) {
 	for (size_t i = 0; i < ctx->clients_len; i++) {
 		oeso_server_client_t *clt = &ctx->clients[i];
 		if (clt->fd != INVALID_SOCKET)
-			update_client(clt, ctx);
+			_oeso_update_client(clt, ctx);
 	}
+	_oeso_clean_list(ctx);
+}
 
+void _oeso_clean_list(oeso_server_ctx_t *ctx) {
 	size_t count = 0;
 	for (size_t i = 0; i < ctx->clients_len; i++) {
 		
 
-		if (!IS_TO_REMOVE(ctx->clients[i])) {
+		if (ctx->clients[i].fd != INVALID_SOCKET) {
 			oeso_server_client_t tmp = ctx->clients[i];
 			ctx->clients[i] = ctx->clients[count];
 			ctx->clients[count] = tmp;
@@ -112,10 +110,9 @@ static void check_clients(oeso_server_ctx_t *ctx) {
 	}
 	size_t idx = ctx->clients_len - 1;
 	while (ctx->clients_len > 0) {
-		if (!IS_TO_REMOVE(ctx->clients[idx]))
+		if (ctx->clients[idx].fd != INVALID_SOCKET)
 			break;
 		ctx->clients_len--;
 		idx--;
 	}
-	
 }

@@ -36,7 +36,7 @@ static int init_fd(oeso_server_ctx_t *ctx, int port) {
 	if (listen(fd, 256) < 0)
 		goto err;
 
-	if (oeso_I_set_nonblock(fd))
+	if (_oeso_set_nonblock(fd))
 		goto err;
 
 	ctx->fd = fd;
