@@ -1,7 +1,7 @@
 #include "oeuf_socket.h"
 
 #if defined(_WIN32)
-int64_t oeso_I_time_ms() {
+int64_t _oeso_time_ms() {
 	int64_t wintime = 0;
 
 	GetSystemTimeAsFileTime((FILETIME *)&wintime);
@@ -19,7 +19,7 @@ int64_t oeso_I_time_ms() {
 }
 
 #elif defined(__linux__)
-int64_t oeso_I_time_ms() {
+int64_t _oeso_time_ms() {
 	struct timespec t;
 	clock_gettime(CLOCK_MONOTONIC, &t);
 

@@ -66,8 +66,7 @@ void _oeso_update_client(oeso_srv_clt_t *clt, oeso_srv_ctx_t *ctx) {
 				if (errno == EAGAIN || errno == EWOULDBLOCK)
 					is_fine = 1;
 			#else 
-				int error = WSAGetLastError();
-				if (error == WSAEWOULDBLOCK)
+				if (WSAGetLastError() == WSAEWOULDBLOCK)
 					is_fine = 1;
 			#endif
 			if (!is_fine)

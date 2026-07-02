@@ -15,12 +15,6 @@ int oeso_server_init(oeso_srv_ctx_t *ctx, int port) {
 
 #if defined(_WIN32) || defined(__linux__)
 static int init_fd(oeso_srv_ctx_t *ctx, int port) {
-	#if defined(_WIN32)
-		WSADATA wsa;
-		if (WSAStartup(MAKEWORD(2,2), &wsa) != 0)
-			return -1;
-	#endif
-
 	oeso_socket_t fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (fd == INVALID_SOCKET)
 		goto err;
@@ -45,9 +39,6 @@ static int init_fd(oeso_srv_ctx_t *ctx, int port) {
 	err:
 		if (fd != INVALID_SOCKET)
 			SOCK_CLOSE(fd);
-		#if defined(_WIN32)
-			WSACleanup();
-		#endif
 		return -1;
 }
 

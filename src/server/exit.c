@@ -1,6 +1,6 @@
 #include "oeuf_socket.h"
 
-void oeso_server_exit(oeso_servre_ctx_t *ctx) {
+void oeso_server_exit(oeso_srv_ctx_t *ctx) {
 	if (ctx->fd != INVALID_SOCKET) {
 		SOCK_CLOSE(ctx->fd);
 		ctx->fd = INVALID_SOCKET;
