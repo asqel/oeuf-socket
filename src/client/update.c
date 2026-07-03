@@ -10,6 +10,7 @@ void oeso_client_update(oeso_clt_ctx_t *ctx) {
 			ctx->on_disconnect(ctx, 1);
 			SOCK_CLOSE(ctx->fd);
 			ctx->fd = INVALID_SOCKET;
+			ctx->is_connected = 0;
 		}
 		else if (ret < 0) {
 			int is_fine = 0;
@@ -27,6 +28,7 @@ void oeso_client_update(oeso_clt_ctx_t *ctx) {
 			ctx->on_disconnect(ctx, 0);
 			SOCK_CLOSE(ctx->fd);
 			ctx->fd = INVALID_SOCKET;
+			ctx->is_connected = 0;
 		}
 	}
 }

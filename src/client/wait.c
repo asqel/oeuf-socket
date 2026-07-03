@@ -1,5 +1,22 @@
 #include "oeuf_socket.h"
 
+static void check_connect(oeso_clt_ctx_t *ctx) {
+	int error = 0;
+	#if defined(_WIN32)
+		int len = sizeof(int);
+		getsockopt(ctx->fd, SOL_SOCKET, SO_ERROR, (void *)&error, &len);
+	#else
+		socklen_t len = sizeof(int);
+		getsockopt(ctx->fd, SOL_SOCKET, SO_ERROR, &error, &len);
+	#endif
+	ctx->is_connected = !error;
+	ctx->on_connect(ctx, ctx->is_connected);
+	if (error) {
+		SOCK_CLOSE(ctx->fd);
+		ctx->fd = INVALID_SOCKET;
+	}
+}
+
 static void wait_events(int64_t timeout, oeso_clt_ctx_t *ctx) {
 	#if defined(_WIN32)
 		WSAPOLLFD fds = {0};
@@ -10,7 +27,7 @@ static void wait_events(int64_t timeout, oeso_clt_ctx_t *ctx) {
 	fds.fd = ctx->fd;
 	fds.revents = 0;
 	fds.events = POLLIN;
-	if (ctx->need_send)
+	if (ctx->need_send || !ctx->is_connected)
 		fds.events |= POLLOUT;
 	
 	#if defined(_WIN32)
@@ -22,6 +39,8 @@ static void wait_events(int64_t timeout, oeso_clt_ctx_t *ctx) {
 		return ;
 	if ((fds.events & POLLOUT) && ctx->need_send)
 		ctx->on_send_ready(ctx);
+	if ((fds.events & POLLOUT) && !ctx->is_connected)
+		check_connect(ctx);
 	if (fds.events & POLLIN) 
 		oeso_client_update(ctx);
 }

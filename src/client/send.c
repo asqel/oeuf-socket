@@ -19,5 +19,6 @@ ssize_t oeso_client_send(oeso_clt_ctx_t *ctx, void *buf, size_t len) {
 	ctx->on_disconnect(ctx, ret != 0);
 	SOCK_CLOSE(ctx->fd);
 	ctx->fd = INVALID_SOCKET;
+	ctx->is_connected = 0;
 	return -1;
 }

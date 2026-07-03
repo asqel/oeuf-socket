@@ -75,6 +75,8 @@ typedef struct oeso_clt_ctx_t oeso_clt_ctx_t;
 struct oeso_clt_ctx_t {
 	oeso_socket_t fd;
 
+	int is_connected;
+	void (*on_connect)(oeso_clt_ctx_t *ctx, int); // int == 0 if failed
 	void (*on_disconnect)(oeso_clt_ctx_t *ctx, int); // int == 0 if reset
 	void (*on_recv)(oeso_clt_ctx_t *ctx, void *, size_t);
 	void (*on_send_ready)(oeso_clt_ctx_t *ctx);
