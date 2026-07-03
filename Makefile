@@ -18,7 +18,7 @@ $(NAME_A): $(OBJ)
 	ar rcs $@ $<
 
 $(NAME_SO): $(OBJ)
-	$(LD) $(LD_FLAGS) $< -o $@
+	$(LD) $< -o $@ $(LD_FLAGS) 
 
 obj/linux/%.o: src/%.c
 	@mkdir -p $(dir $@)
