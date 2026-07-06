@@ -1,4 +1,5 @@
 #include "oeuf_socket.h"
+#include <arpa/inet.h>
 
 static oeso_socket_t get_fd(const char *ip, int port) {
 	oeso_socket_t res = INVALID_SOCKET;
@@ -18,7 +19,7 @@ static oeso_socket_t get_fd(const char *ip, int port) {
 			SOCK_CLOSE(res);
 			continue;
 		}
-		((struct sockaddr_in *)ptr->ai_addr)->sin_port = port;
+		((struct sockaddr_in *)ptr->ai_addr)->sin_port = htons(port);
 		int ret = connect(res, ptr->ai_addr, ptr->ai_addrlen);
 		int is_fine = 0;
 		if (ret) {

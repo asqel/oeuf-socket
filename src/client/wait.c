@@ -29,6 +29,8 @@ static void wait_events(int64_t timeout, oeso_clt_ctx_t *ctx) {
 	fds.events = POLLIN;
 	if (ctx->need_send || !ctx->is_connected)
 		fds.events |= POLLOUT;
+	if (!ctx->is_connected)
+		fds.events |= POLLERR | POLLHUP;
 	
 	#if defined(_WIN32)
 		int ret = WSAPoll(&fds, 1, timeout);
@@ -37,11 +39,11 @@ static void wait_events(int64_t timeout, oeso_clt_ctx_t *ctx) {
 	#endif
 	if (ret <= 0)
 		return ;
-	if ((fds.events & POLLOUT) && ctx->need_send)
+	if ((fds.revents & POLLOUT) && ctx->need_send)
 		ctx->on_send_ready(ctx);
-	if ((fds.events & POLLOUT) && !ctx->is_connected)
+	if (((fds.revents & POLLOUT) || (fds.revents & POLLERR) || (fds.revents & POLLHUP)) && !ctx->is_connected)
 		check_connect(ctx);
-	if (fds.events & POLLIN) 
+	if (fds.revents & POLLIN) 
 		oeso_client_update(ctx);
 }
 
