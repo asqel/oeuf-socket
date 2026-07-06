@@ -15,10 +15,10 @@ CFLAGS = -Wall -Wextra -I.
 all: $(NAME_A) $(NAME_SO)
 
 $(NAME_A): $(OBJ)
-	ar rcs $@ $<
+	ar rcs $@ $^
 
 $(NAME_SO): $(OBJ)
-	$(LD) $< -o $@ $(LD_FLAGS) 
+	$(LD) $^ -o $@ $(LD_FLAGS) 
 
 obj/linux/%.o: src/%.c
 	@mkdir -p $(dir $@)
