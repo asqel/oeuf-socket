@@ -20,8 +20,18 @@ static oeso_socket_t get_fd(const char *ip, int port) {
 		}
 		((struct sockaddr_in *)ptr->ai_addr)->sin_port = port;
 		if (!connect(res, ptr->ai_addr, ptr->ai_addrlen)) {
-			freeaddrinfo(info);
-			return res;
+			int is_fine = 0;
+			#if defined(_WIN32)
+				if (WSAGetLastError() == WSAEWOULDBLOCK)
+					is_fine = 1;
+			#else
+				if (errno == EAGAIN || errno == EWOULDBLOCK)
+					is_fine = 1;
+			#endif
+			if (is_fine) {
+				freeaddrinfo(info);
+				return res;
+			}
 		}
 		SOCK_CLOSE(res);
 	}
