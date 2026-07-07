@@ -1,5 +1,7 @@
 #include "oeuf_socket.h"
+#if !defined(_WIN32)
 #include <arpa/inet.h>
+#endif
 
 static oeso_socket_t get_fd(const char *ip, int port) {
 	oeso_socket_t res = INVALID_SOCKET;
